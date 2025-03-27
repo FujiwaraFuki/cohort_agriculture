@@ -1,6 +1,9 @@
-Untitled
+IPW for observational data of mandarin orange
 ================
-2025-03-27
+F.FUJIWARA
+2025/03/27
+
+## Packages
 
 ``` r
 library(tidyverse)
@@ -14,11 +17,13 @@ library(survey)
 library(doParallel) 
 
 setup_parallel <- function() {
-  cores <- getOption("mc.cores", detectCores())  # CPU コア数を取得
-  cl <- makeCluster(cores-1)  # クラスタ作成
-  registerDoParallel(cl)  # 並列処理を登録
+  cores <- getOption("mc.cores", detectCores())
+  cl <- makeCluster(cores-1)
+  registerDoParallel(cl)
 }
 ```
+
+## Data
 
 ``` r
 load <- readRDS("NTT_Data_norm_2021_2022_latest.rds")
@@ -28,12 +33,15 @@ meta <- load$features_integrated_norm_2021_2022
 
 v_cate <- unique(meta$Category)
 
-# remove paired-field data
-model_id <- read.csv("model_id.csv")$model_id
+model_id <- read.csv("model_id.csv")$model_id 
 
-data_model <- data[data$Sample_ID %in% model_id,]
-data <- data[!data$Sample_ID %in% model_id,]
+data_model <- data[data$Sample_ID %in% model_id,] # paired-field data
+data <- data[!data$Sample_ID %in% model_id,] # remove paired-field data
+
+ids <- read.csv("Experiment_ID.csv")
 ```
+
+## Sample map in Japan
 
 ``` r
 world <- ggplot2::map_data("world")
@@ -90,7 +98,9 @@ g <- dat.Japan %>%
 g
 ```
 
-![](script_github_files/figure-gfm/unnamed-chunk-88-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+## Definition of calculation
 
 ``` r
 get_loveplot <- function(control, category, targets, data, meta) {
@@ -207,6 +217,8 @@ get_iptw <- function(control, category, targets, data, meta) {
 }
 ```
 
+## Settting target variables
+
 ``` r
 targets <- c(colnames(data)[meta$Category=="Fruit_Quality"][1:8],
              colnames(data)[meta$Category=="Soil_Property"],
@@ -237,6 +249,8 @@ targets <- c(colnames(data)[meta$Category=="Fruit_Quality"][1:8],
              )
 targets <- targets[-which(duplicated(targets))]
 ```
+
+## Plot of covariate balance (love plot)
 
 ``` r
 coviriates <- ~ TMP_mea + APCP + SSD + Age + Cultiver + Soil_Domestic_level1 - 1
@@ -316,7 +330,9 @@ ggplot(result, aes(covariate, value, color=name, shape=name))+
     )
 ```
 
-![](script_github_files/figure-gfm/unnamed-chunk-92-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+## Calculation of IPW
 
 ``` r
 setup_parallel()
@@ -343,9 +359,9 @@ result <- cbind(result[,1:4], fdr[,1],
 saveRDS(result, file = "cohort_ipw_result.rds")
 ```
 
-``` r
-ids <- read.csv("Experiment_ID.csv")
+## Calculation of Paied field data
 
+``` r
 id <- c(ids$ID)[ids$Experiment == "Kainan" & !is.na(ids$Replicate) & ids$Sample == "fruit"]
 
 df <- left_join(data_model[data_model$Sample_ID %in% id, ], ids[, -c(4,5)], by=c("Sample_ID" = "ID"))
@@ -388,6 +404,8 @@ v2$fdr <- p.adjust(v2$pvalue, method = "BH")
 
 saveRDS(v2, file = "NTT_model_Kainan_result.rds")
 ```
+
+## Visualization
 
 ``` r
 library(grid)
@@ -479,4 +497,6 @@ g <- ggplot(df)+
 g
 ```
 
-![](script_github_files/figure-gfm/unnamed-chunk-95-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+<!--rmarkdown::render("README.Rmd", output_format = "github_document")-->
