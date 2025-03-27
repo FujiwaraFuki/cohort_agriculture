@@ -98,7 +98,7 @@ g <- dat.Japan %>%
 g
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+<img src="README_files/figure-gfm/unnamed-chunk-1-1.png" width="100%" />
 
 ## Definition of calculation
 
@@ -330,7 +330,7 @@ ggplot(result, aes(covariate, value, color=name, shape=name))+
     )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+<img src="README_files/figure-gfm/unnamed-chunk-5-1.png" width="100%" />
 
 ## Calculation of IPW
 
@@ -497,6 +497,6 @@ g <- ggplot(df)+
 g
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+<img src="README_files/figure-gfm/unnamed-chunk-8-1.png" width="100%" />
 
 <!--rmarkdown::render("README.Rmd", output_format = "github_document")-->
